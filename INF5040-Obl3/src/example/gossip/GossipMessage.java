@@ -5,11 +5,11 @@ import java.util.List;
 import peersim.core.Node;
 
 public class GossipMessage {
-	
+
 	private Node node;
 	private List<Entry> shuffleList;
 	private MessageType type;
-	
+
 	public GossipMessage(Node node, List<Entry> shuffleList) {
 		super();
 		this.node = node;
@@ -19,12 +19,15 @@ public class GossipMessage {
 	public Node getNode() {
 		return node;
 	}
+
 	public void setNode(Node node) {
 		this.node = node;
 	}
+
 	public List<Entry> getShuffleList() {
 		return shuffleList;
 	}
+
 	public void setShuffleList(List<Entry> shuffleList) {
 		this.shuffleList = shuffleList;
 	}
@@ -36,5 +39,5 @@ public class GossipMessage {
 	public void setType(MessageType type) {
 		this.type = type;
 	}
-	
+
 }

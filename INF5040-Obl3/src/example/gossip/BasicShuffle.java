@@ -11,27 +11,24 @@ import peersim.edsim.EDProtocol;
 
 
 /**
- * @author Lucas Provensi
- * 
  * Basic Shuffling protocol template
  * 
- * The basic shuffling algorithm, introduced by Stavrou et al in the paper: 
- * "A Lightweight, Robust P2P System to Handle Flash Crowds", is a simple 
- * peer-to-peer communication model. It forms an overlay and keeps it 
- * connected by means of an epidemic algorithm. The protocol is extremely 
- * simple: each peer knows a small, continuously changing set of other peers, 
- * called its neighbors, and occasionally contacts a random one to exchange 
- * some of their neighbors.
+ * The basic shuffling algorithm, introduced by Stavrou et al in the paper:
+ * "A Lightweight, Robust P2P System to Handle Flash Crowds", is a simple
+ * peer-to-peer communication model. It forms an overlay and keeps it connected
+ * by means of an epidemic algorithm. The protocol is extremely simple: each
+ * peer knows a small, continuously changing set of other peers, called its
+ * neighbors, and occasionally contacts a random one to exchange some of their
+ * neighbors.
  * 
  * This class is a template with instructions of how to implement the shuffling
- * algorithm in PeerSim.
- * Should make use of the classes Entry and GossipMessage:
- *    Entry - Is an entry in the cache, contains a reference to a neighbor node
- *  		  and a reference to the last node this entry was sent to.
- *    GossipMessage - The message used by the protocol. It can be a shuffle
- *    		  request, reply or reject message. It contains the originating
- *    		  node and the shuffle list.
+ * algorithm in PeerSim. Should make use of the classes Entry and GossipMessage:
+ * Entry - Is an entry in the cache, contains a reference to a neighbor node and
+ * a reference to the last node this entry was sent to. GossipMessage - The
+ * message used by the protocol. It can be a shuffle request, reply or reject
+ * message. It contains the originating node and the shuffle list.
  *
+ * @author Lucas Provensi
  */
 public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 	
