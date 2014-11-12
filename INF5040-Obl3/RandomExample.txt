@@ -5,7 +5,7 @@
 SIZE 10000
 
 CYCLE 1000
-CYCLES 300
+CYCLES 10
 
 random.seed 1234567890
 network.size SIZE
@@ -28,15 +28,24 @@ control.degree example.reports.InDegreeObserver
 	protocol gossip
 
 	step CYCLE
-	starttime 299000
-	endtime 300000
+	starttime 9000
+	endtime 10000
 }
 
-control.graphPL GraphStats
+control.avgClustering no.uio.inf5040.obl3.AverageClusteringPrinter
 {
 	protocol gossip
 	step CYCLE
 	undir true
-	#nl 10
+	outf output-clustering.txt
 	nc 1000
+}
+
+control.avgLength no.uio.inf5040.obl3.AverageLengthPrinter
+{
+	protocol gossip
+	step CYCLE
+	undir true
+	outf output-length.txt
+	nl 10
 }
