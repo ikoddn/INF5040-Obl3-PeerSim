@@ -5,9 +5,11 @@ import java.util.List;
 
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
+import peersim.core.CommonState;
 import peersim.core.Linkable;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
+import peersim.transport.Transport;
 
 
 /**
@@ -47,19 +49,21 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 	// The maximum length of the shuffle exchange;
 	private final int l;
 	
+	private boolean awaitingResponse;
+	
 	/**
 	 * Constructor that initializes the relevant simulation parameters and
 	 * other class variables.
 	 * 
 	 * @param n simulation parameters
 	 */
-	public BasicShuffle(String n)
-	{
+	public BasicShuffle(String n) {
 		this.size = Configuration.getInt(n + "." + PAR_CACHE);
 		this.l = Configuration.getInt(n + "." + PAR_L);
 		this.tid = Configuration.getPid(n + "." + PAR_TRANSPORT);
 
 		cache = new ArrayList<Entry>(size);
+		awaitingResponse = false;
 	}
 
 	/* START YOUR IMPLEMENTATION FROM HERE
@@ -78,25 +82,60 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		// Let's name this node as P
 		
 		// 1. If P is waiting for a response from a shuffling operation initiated in a previous cycle, return;
-		// 2. If P's cache is empty, return;		
+		if (awaitingResponse) {
+			return;
+		}
+		
+		// 2. If P's cache is empty, return;
+		if (cache == null || cache.isEmpty()) {
+			return;
+		}
+		
 		// 3. Select a random neighbor (named Q) from P's cache to initiate the shuffling;
 		//	  - You should use the simulator's common random source to produce a random number: CommonState.r.nextInt(cache.size())
+		List<Entry> cacheCopy = new ArrayList<Entry>(cache);
+		
+		int randomNumber = CommonState.r.nextInt(cache.size());
+		Entry q = cacheCopy.remove(randomNumber);
+		
 		// 4. If P's cache is full, remove Q from the cache;
+		if (cache.size() >= size) {
+			cache.remove(q);
+		}
+		
 		// 5. Select a subset of other l - 1 random neighbors from P's cache;
 		//	  - l is the length of the shuffle exchange
-		//    - Do not add Q to this subset	
+		//    - Do not add Q to this subset
+		List<Entry> subset = new ArrayList<Entry>(l);
+		
+		for (int i = 0; i < l - 1 && !cacheCopy.isEmpty(); ++i) {
+			randomNumber = CommonState.r.nextInt(cacheCopy.size());
+			
+			Entry neighbor = cacheCopy.remove(randomNumber);
+			subset.add(neighbor);
+		}
+		
+		
 		// 6. Add P to the subset;
+		Entry p = new Entry(node);
+		subset.add(p);
+		
+		for (Entry entry : subset) {
+			entry.setSentTo(q.getNode());
+		}
+		
 		// 7. Send a shuffle request to Q containing the subset;
 		//	  - Keep track of the nodes sent to Q
 		//	  - Example code for sending a message:
-		//
-		// GossipMessage message = new GossipMessage(node, subset);
-		// message.setType(MessageType.SHUFFLE_REQUEST);
-		// Transport tr = (Transport) node.getProtocol(tid);
-		// tr.send(node, Q.getNode(), message, protocolID);
-		//
+		GossipMessage message = new GossipMessage(node, subset);
+		message.setType(MessageType.SHUFFLE_REQUEST);
+		Transport tr = (Transport) node.getProtocol(tid);
+		tr.send(node, q.getNode(), message, protocolID);
+		
+		
 		// 8. From this point on P is waiting for Q's response and will not initiate a new shuffle operation;
-		//
+		awaitingResponse = true;
+		
 		// The response from Q will be handled by the method processEvent.
 		
 	}
@@ -134,13 +173,17 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		//		 - No neighbor appears twice in the cache
 		//		 - Use empty cache slots to add new entries
 		//		 - If the cache is full, you can replace entries among the ones originally sent to P with the new ones
-		//	  3. Q is no longer waiting for a shuffle reply;	 
+			
+		//	  3. Q is no longer waiting for a shuffle reply;
+			awaitingResponse = false;
 			break;
 		
 		// If the message is a shuffle rejection:
 		case SHUFFLE_REJECTED:
 		//	  1. If P was originally removed from Q's cache, add it again to the cache.
+			
 		//	  2. Q is no longer waiting for a shuffle reply;
+			awaitingResponse = false;
 			break;
 			
 		default:
@@ -180,12 +223,12 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		return cache.contains(new Entry(neighbor));
 	}
 
-	public Object clone()
-	{
+	public Object clone() {
+		System.out.println("CLONING");
 		BasicShuffle gossip = null;
 		try { 
 			gossip = (BasicShuffle) super.clone(); 
-		} catch( CloneNotSupportedException e ) {
+		} catch (CloneNotSupportedException e) {
 			
 		} 
 		gossip.cache = new ArrayList<Entry>();
