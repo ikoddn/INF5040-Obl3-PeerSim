@@ -44,6 +44,9 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 
 	// The list of neighbors known by this node, or the cache.
 	private List<Entry> cache;
+
+	// Keeps track of node removals
+	private boolean nodeRemoved;
 	
 	// The maximum size of the cache;
 	private final int size;
@@ -66,6 +69,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 
 		cache = new ArrayList<Entry>(size);
 		awaitingResponse = false;
+		nodeRemoved = false;
 	}
 
 	/* START YOUR IMPLEMENTATION FROM HERE
@@ -103,6 +107,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		// 4. If P's cache is full, remove Q from the cache;
 		if (cache.size() >= size) {
 			cache.remove(q);
+			nodeRemoved = true;
 		}
 		
 		// 5. Select a subset of other l - 1 random neighbors from P's cache;
@@ -181,13 +186,17 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 				sendMessage(node, message.getNode(), null, MessageType.SHUFFLE_REJECTED, pid);
 				return;
 			}
-			//subset = makeRandomSubset(srcNode, destNode);
-			//sendMessage(node, message.getNode(), subset, MessageType.SHUFFLE_RESPONSE, pid);
-		//	  2. Q selects a random subset of size l of its own neighbors; 
-			//List<Entry> subset = getRandomSubset()
+			
+			
+		//	  2. Q selects a random subset of size l of its own neighbors;
+			List<Entry> subset = getRandomSubset(cache, l);
+			
 		//	  3. Q reply P's shuffle request by sending back its own subset;
-			//addSubset(message.shuffleList);
+			sendMessage(node, message.getNode(), subset, MessageType.SHUFFLE_REPLY, pid);
+			
 		//	  4. Q updates its cache to include the neighbors sent by P:
+			addSubset(message.getShuffleList());
+			
 		//		 - No neighbor appears twice in the cache
 		//		 - Use empty cache slots to add the new entries
 		//		 - If the cache is full, you can replace entries among the ones sent to P with the new ones
@@ -231,6 +240,10 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		// If the message is a shuffle rejection:
 		case SHUFFLE_REJECTED:
 		//	  1. If P was originally removed from Q's cache, add it again to the cache.
+			if(nodeRemoved) {
+				cache.add(new Entry(message.getNode()));
+				nodeRemoved = false;
+			}
 			
 		//	  2. Q is no longer waiting for a shuffle reply;
 			awaitingResponse = false;
