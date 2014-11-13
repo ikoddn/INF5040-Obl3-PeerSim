@@ -137,11 +137,22 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 	}
 	
 	
+	/**
+	 * @param srcNode
+	 * @param destNode
+	 * @param subset
+	 * @param type
+	 * @param protocolID
+	 */
 	private void sendMessage(Node srcNode, Node destNode, List<Entry> subset, MessageType type, int protocolID) {
 		GossipMessage message = new GossipMessage(srcNode, subset);
 		message.setType(MessageType.SHUFFLE_REQUEST);
 		Transport tr = (Transport) srcNode.getProtocol(tid);
 		tr.send(srcNode, destNode, message, protocolID);		
+	}
+	
+	private void addSubset(List<Entry> subset) {
+		
 	}
 
 	/* The simulator engine calls the method processEvent at the specific time unit that an event occurs in the simulation.
@@ -167,9 +178,12 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 				sendMessage(node, message.getNode(), null, MessageType.SHUFFLE_REJECTED, pid);
 				return;
 			}
-			
+			//subset = makeRandomSubset(srcNode, destNode);
+			//sendMessage(node, message.getNode(), subset, MessageType.SHUFFLE_RESPONSE, pid);
 		//	  2. Q selects a random subset of size l of its own neighbors; 
+			//List<Entry> subset = getRandomSubset()
 		//	  3. Q reply P's shuffle request by sending back its own subset;
+			//addSubset(message.shuffleList);
 		//	  4. Q updates its cache to include the neighbors sent by P:
 		//		 - No neighbor appears twice in the cache
 		//		 - Use empty cache slots to add the new entries
