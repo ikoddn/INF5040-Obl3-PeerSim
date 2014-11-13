@@ -238,18 +238,17 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		while (it.hasNext()) {
 			Entry qNeighbor = it.next();
 			
-			if (qNeighbor.getSentTo().equals(source)) {
+			if (source.equals(qNeighbor.getSentTo())) {
 				replacableIndices.add(it.nextIndex() - 1);
 			}
 		}
 		
 		for (Entry neighbor : neighbors) {
 			if (!cache.contains(neighbor)) {
-				// If the cache is full
-				if (cache.size() == size) {
-					cache.set(replacableIndices.removeFirst(), neighbor);
-				} else {
+				if (cache.size() < size) {
 					cache.add(neighbor);
+				} else if (!replacableIndices.isEmpty()) {
+					cache.set(replacableIndices.removeFirst(), neighbor);
 				}
 			}
 		}
