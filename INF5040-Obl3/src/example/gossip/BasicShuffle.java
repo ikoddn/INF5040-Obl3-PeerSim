@@ -1,6 +1,7 @@
 package example.gossip;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import peersim.cdsim.CDProtocol;
@@ -106,15 +107,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		// 5. Select a subset of other l - 1 random neighbors from P's cache;
 		//	  - l is the length of the shuffle exchange
 		//    - Do not add Q to this subset
-		List<Entry> subset = new ArrayList<Entry>(l);
-		
-		for (int i = 0; i < l - 1 && !cacheCopy.isEmpty(); ++i) {
-			randomNumber = CommonState.r.nextInt(cacheCopy.size());
-			
-			Entry neighbor = cacheCopy.remove(randomNumber);
-			subset.add(neighbor);
-		}
-		
+		List<Entry> subset = getRandomSubset(cacheCopy, l - 1);
 		
 		// 6. Add P to the subset;
 		Entry p = new Entry(node);
@@ -136,10 +129,23 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		
 	}
 	
+	private List<Entry> getRandomSubset(List<Entry> set, int subsetSize) {
+		List<Entry> setCopy = new ArrayList<Entry>(set);
+		List<Entry> subset = new LinkedList<Entry>();
+		
+		for (int i = 0; i < subsetSize && !setCopy.isEmpty(); ++i) {
+			int randomNumber = CommonState.r.nextInt(setCopy.size());
+			
+			Entry neighbor = setCopy.remove(randomNumber);
+			subset.add(neighbor);
+		}
+		
+		return subset;
+	}
 	
 	private void sendMessage(Node srcNode, Node destNode, List<Entry> subset, MessageType type, int protocolID) {
 		GossipMessage message = new GossipMessage(srcNode, subset);
-		message.setType(MessageType.SHUFFLE_REQUEST);
+		message.setType(type);
 		Transport tr = (Transport) srcNode.getProtocol(tid);
 		tr.send(srcNode, destNode, message, protocolID);		
 	}
