@@ -195,11 +195,10 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 			sendMessage(node, message.getNode(), subset, MessageType.SHUFFLE_REPLY, pid);
 			
 		//	  4. Q updates its cache to include the neighbors sent by P:
-			addSubset(message.getShuffleList());
-			
 		//		 - No neighbor appears twice in the cache
 		//		 - Use empty cache slots to add the new entries
 		//		 - If the cache is full, you can replace entries among the ones sent to P with the new ones
+			updateCache(message.getNode(), message.getShuffleList());
 			break;
 		
 		// If the message is a shuffle reply:
@@ -208,30 +207,8 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		//	  2. Q updates its cache to include the neighbors sent by P:
 		//		 - No neighbor appears twice in the cache
 		//		 - Use empty cache slots to add new entries
-		//		 - If the cache is full, you can replace entries among the ones originally sent to P with the new ones
-			List<Entry> pNeighbors = message.getShuffleList();
-			LinkedList<Integer> replacableIndices = new LinkedList<Integer>();
-			Node p = message.getNode();
-			
-			ListIterator<Entry> it = cache.listIterator();
-			while (it.hasNext()) {
-				Entry qNeighbor = it.next();
-				
-				if (qNeighbor.getSentTo().equals(p)) {
-					replacableIndices.add(it.nextIndex() - 1);
-				}
-			}
-			
-			for (Entry pNeighbor : pNeighbors) {
-				if (!cache.contains(pNeighbor)) {
-					// If the cache is full
-					if (cache.size() == size) {
-						cache.set(replacableIndices.removeFirst(), pNeighbor);
-					} else {
-						cache.add(pNeighbor);
-					}
-				}
-			}
+		//		 - If the cache is full, you can replace entries among the ones originally sent to P with the new ones			
+			updateCache(message.getNode(), message.getShuffleList());
 			
 		//	  3. Q is no longer waiting for a shuffle reply;
 			awaitingResponse = false;
@@ -251,8 +228,31 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 			
 		default:
 			break;
+		}	
+	}
+	
+	private void updateCache(Node source, List<Entry> neighbors) {
+		LinkedList<Integer> replacableIndices = new LinkedList<Integer>();
+		
+		ListIterator<Entry> it = cache.listIterator();
+		while (it.hasNext()) {
+			Entry qNeighbor = it.next();
+			
+			if (qNeighbor.getSentTo().equals(source)) {
+				replacableIndices.add(it.nextIndex() - 1);
+			}
 		}
 		
+		for (Entry neighbor : neighbors) {
+			if (!cache.contains(neighbor)) {
+				// If the cache is full
+				if (cache.size() == size) {
+					cache.set(replacableIndices.removeFirst(), neighbor);
+				} else {
+					cache.add(neighbor);
+				}
+			}
+		}
 	}
 	
 /* The following methods are used only by the simulator and don't need to be changed */
@@ -287,7 +287,6 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 	}
 
 	public Object clone() {
-		System.out.println("CLONING");
 		BasicShuffle gossip = null;
 		try { 
 			gossip = (BasicShuffle) super.clone(); 
