@@ -3,6 +3,7 @@ package example.gossip;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
@@ -156,10 +157,6 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		Transport tr = (Transport) srcNode.getProtocol(tid);
 		tr.send(srcNode, destNode, message, protocolID);		
 	}
-	
-	private void addSubset(List<Entry> subset) {
-		
-	}
 
 	/* The simulator engine calls the method processEvent at the specific time unit that an event occurs in the simulation.
 	 * It is not called periodically as the nextCycle method.
@@ -203,6 +200,29 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		//		 - No neighbor appears twice in the cache
 		//		 - Use empty cache slots to add new entries
 		//		 - If the cache is full, you can replace entries among the ones originally sent to P with the new ones
+			List<Entry> pNeighbors = message.getShuffleList();
+			LinkedList<Integer> replacableIndices = new LinkedList<Integer>();
+			Node p = message.getNode();
+			
+			ListIterator<Entry> it = cache.listIterator();
+			while (it.hasNext()) {
+				Entry qNeighbor = it.next();
+				
+				if (qNeighbor.getSentTo().equals(p)) {
+					replacableIndices.add(it.nextIndex() - 1);
+				}
+			}
+			
+			for (Entry pNeighbor : pNeighbors) {
+				if (!cache.contains(pNeighbor)) {
+					// If the cache is full
+					if (cache.size() == size) {
+						cache.set(replacableIndices.removeFirst(), pNeighbor);
+					} else {
+						cache.add(pNeighbor);
+					}
+				}
+			}
 			
 		//	  3. Q is no longer waiting for a shuffle reply;
 			awaitingResponse = false;
