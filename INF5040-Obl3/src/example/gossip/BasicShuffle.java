@@ -127,17 +127,21 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		// 7. Send a shuffle request to Q containing the subset;
 		//	  - Keep track of the nodes sent to Q
 		//	  - Example code for sending a message:
-		GossipMessage message = new GossipMessage(node, subset);
-		message.setType(MessageType.SHUFFLE_REQUEST);
-		Transport tr = (Transport) node.getProtocol(tid);
-		tr.send(node, q.getNode(), message, protocolID);
-		
+		sendMessage(node, q.getNode(), subset, MessageType.SHUFFLE_REQUEST, protocolID);
 		
 		// 8. From this point on P is waiting for Q's response and will not initiate a new shuffle operation;
 		awaitingResponse = true;
 		
 		// The response from Q will be handled by the method processEvent.
 		
+	}
+	
+	
+	private void sendMessage(Node srcNode, Node destNode, List<Entry> subset, MessageType type, int protocolID) {
+		GossipMessage message = new GossipMessage(srcNode, subset);
+		message.setType(MessageType.SHUFFLE_REQUEST);
+		Transport tr = (Transport) srcNode.getProtocol(tid);
+		tr.send(srcNode, destNode, message, protocolID);		
 	}
 
 	/* The simulator engine calls the method processEvent at the specific time unit that an event occurs in the simulation.
@@ -157,7 +161,13 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		switch (message.getType()) {
 		// If the message is a shuffle request:
 		case SHUFFLE_REQUEST:
-		//	  1. If Q is waiting for a response from a shuffling initiated in a previous cycle, send back to P a message rejecting the shuffle request; 
+		//	  1. If Q is waiting for a response from a shuffling initiated in a previous cycle, send back to P a message rejecting the shuffle request;
+			
+			if(awaitingResponse) {
+				sendMessage(node, message.getNode(), null, MessageType.SHUFFLE_REJECTED, pid);
+				return;
+			}
+			
 		//	  2. Q selects a random subset of size l of its own neighbors; 
 		//	  3. Q reply P's shuffle request by sending back its own subset;
 		//	  4. Q updates its cache to include the neighbors sent by P:
