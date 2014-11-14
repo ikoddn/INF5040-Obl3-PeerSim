@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Queue;
 
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
@@ -232,11 +233,13 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 	}
 	
 	private void updateCache(Node source, List<Entry> neighbors) {
-		LinkedList<Integer> replacableIndices = new LinkedList<Integer>();
+		Queue<Integer> replacableIndices = new LinkedList<Integer>();
+		List<Entry> cacheCopy = new LinkedList<Entry>();
 		
 		ListIterator<Entry> it = cache.listIterator();
 		while (it.hasNext()) {
 			Entry qNeighbor = it.next();
+			cacheCopy.add(qNeighbor);
 			
 			if (source.equals(qNeighbor.getSentTo())) {
 				replacableIndices.add(it.nextIndex() - 1);
@@ -244,11 +247,22 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		}
 		
 		for (Entry neighbor : neighbors) {
-			if (!cache.contains(neighbor)) {
+			boolean alreadyInCache = false;
+			it = cacheCopy.listIterator();
+			
+			while (it.hasNext() && !alreadyInCache) {
+				alreadyInCache = neighbor.equals(it.next());
+				
+				if (alreadyInCache) {
+					it.remove();
+				}
+			}
+			
+			if (!alreadyInCache) {
 				if (cache.size() < size) {
 					cache.add(neighbor);
 				} else if (!replacableIndices.isEmpty()) {
-					cache.set(replacableIndices.removeFirst(), neighbor);
+					cache.set(replacableIndices.poll(), neighbor);
 				}
 			}
 		}
