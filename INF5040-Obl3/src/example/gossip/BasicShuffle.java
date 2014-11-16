@@ -299,14 +299,16 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		return cache.contains(new Entry(neighbor));
 	}
 
+	@Override
 	public Object clone() {
 		BasicShuffle gossip = null;
+		
 		try { 
 			gossip = (BasicShuffle) super.clone(); 
-		} catch (CloneNotSupportedException e) {
-			
+		} catch (CloneNotSupportedException e) {	
 		} 
-		gossip.cache = new ArrayList<Entry>();
+		
+		gossip.cache = new ArrayList<Entry>(size);
 
 		return gossip;
 	}
