@@ -10,6 +10,8 @@ import peersim.reports.GraphObserver;
 
 public abstract class GraphStatsPrinter extends GraphObserver {
 
+	private static final String OUTPUT_LOCATION = "plot/";
+	
 	private static final String PAR_OUTFILE = "outf";
 	private static final String PAR_STEP = "step";
 
@@ -23,7 +25,7 @@ public abstract class GraphStatsPrinter extends GraphObserver {
 
 		String outfile = Configuration.getString(name + "." + PAR_OUTFILE);
 		try {
-			writer = new PrintWriter(outfile, "UTF-8");
+			writer = new PrintWriter(OUTPUT_LOCATION + outfile, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			// Not possible
 		}
@@ -34,11 +36,15 @@ public abstract class GraphStatsPrinter extends GraphObserver {
 		boolean result = execute(writer);
 
 		// Check if this is the last cycle
-		if (CommonState.getTime() + step >= CommonState.getEndTime()) {
+		if (lastCycle()) {
 			writer.close();
 		}
 
 		return result;
+	}
+	
+	protected boolean lastCycle() {
+		return CommonState.getTime() + step >= CommonState.getEndTime();
 	}
 
 	protected abstract boolean execute(PrintWriter writer);

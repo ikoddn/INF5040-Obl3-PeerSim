@@ -49,16 +49,6 @@ init.sch CDScheduler
 	protocol gossip
 }
 
-control.degree example.reports.InDegreeObserver
-{
-	protocol gossip
-
-	step CYCLE
-	starttime 0
-	#starttime simulation.endtime-CYCLE
-	endtime simulation.endtime
-}
-
 control.avgClustering no.uio.inf5040.obl3.AverageClusteringPrinter
 {
 	protocol gossip
@@ -75,4 +65,11 @@ control.avgLength no.uio.inf5040.obl3.AverageLengthPrinter
 	undir true
 	outf output-length.txt
 	nl 10
+}
+
+control.degree no.uio.inf5040.obl3.InDegreePrinter
+{
+	protocol gossip
+	step CYCLE
+	outf output-indegree.txt
 }
