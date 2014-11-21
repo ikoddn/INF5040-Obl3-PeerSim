@@ -120,16 +120,14 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 			randomNumber = CommonState.r.nextInt(cacheCopy.size());
 			
 			Entry neighbor = cacheCopy.remove(randomNumber);
-			subset.add(neighbor);
+			neighbor.setSentTo(q.getNode());
+			
+			subset.add(new Entry(neighbor.getNode()));
 		}
 		
 		// 6. Add P to the subset;
 		Entry p = new Entry(node);
 		subset.add(p);
-		
-		for (Entry entry : subset) {
-			entry.setSentTo(q.getNode());
-		}
 		
 		// 7. Send a shuffle request to Q containing the subset;
 		//	  - Keep track of the nodes sent to Q
@@ -193,7 +191,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 				int randomNumber = CommonState.r.nextInt(cacheCopy.size());
 				
 				Entry neighbor = cacheCopy.remove(randomNumber);
-				subset.add(neighbor);
+				subset.add(new Entry(neighbor.getNode()));
 			}
 			
 		//	  3. Q reply P's shuffle request by sending back its own subset;
@@ -235,7 +233,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 			
 		default:
 			break;
-		}	
+		}
 	}
 	
 	private void updateCache(Node source, List<Entry> neighbors) {
@@ -245,24 +243,33 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		ListIterator<Entry> it = cache.listIterator();
 		while (it.hasNext()) {
 			Entry qNeighbor = it.next();
-			cacheCopy.add(qNeighbor);
+
+			
 			
 			Node sentTo = qNeighbor.getSentTo();
 			if (sentTo != null && source.getID() == sentTo.getID()) {
 				replacableIndices.add(it.nextIndex() - 1);
 			}
+			
+			cacheCopy.add(new Entry(qNeighbor.getNode()));
 		}
 
 		for (Entry neighbor : neighbors) {
 			boolean alreadyInCache = cacheCopy.remove(neighbor);
-			
+
 			if (!alreadyInCache) {
+				Entry entry = new Entry(neighbor.getNode());
+				
 				if (cache.size() < size) {
-					cache.add(neighbor);
+					cache.add(entry);
 				} else if (!replacableIndices.isEmpty()) {
-					cache.set(replacableIndices.poll(), neighbor);
+					cache.set(replacableIndices.poll(), entry);
 				}
 			}
+		}
+		
+		for (Entry cachedEntry : cache) {
+			cachedEntry.setSentTo(null);
 		}
 	}
 	

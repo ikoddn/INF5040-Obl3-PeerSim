@@ -4,7 +4,7 @@
 SIZE 10000
 
 CYCLE 1000
-CYCLES 100
+CYCLES 300
 
 MINDELAY 10
 MAXDELAY 60
@@ -54,7 +54,8 @@ control.degree example.reports.InDegreeObserver
 	protocol gossip
 
 	step CYCLE
-	starttime simulation.endtime-CYCLE
+	starttime 0
+	#starttime simulation.endtime-CYCLE
 	endtime simulation.endtime
 }
 
