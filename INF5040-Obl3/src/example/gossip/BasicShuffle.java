@@ -191,6 +191,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 				int randomNumber = CommonState.r.nextInt(cacheCopy.size());
 				
 				Entry neighbor = cacheCopy.remove(randomNumber);
+				neighbor.setSentTo(p);
 				subset.add(new Entry(neighbor.getNode()));
 			}
 			
@@ -217,10 +218,18 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 			awaitingResponse = false;
 			
 			nodeRemoved = false;
+			
+			for (Entry entry : cache) {
+				entry.setSentTo(null);
+			}
 			break;
 		
 		// If the message is a shuffle rejection:
 		case SHUFFLE_REJECTED:
+			for (Entry entry : cache) {
+				entry.setSentTo(null);
+			}
+			
 		//	  1. If P was originally removed from Q's cache, add it again to the cache.
 			if(nodeRemoved) {
 				cache.add(new Entry(p));
@@ -230,7 +239,6 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		//	  2. Q is no longer waiting for a shuffle reply;
 			awaitingResponse = false;
 			break;
-			
 		default:
 			break;
 		}
@@ -244,32 +252,24 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		while (it.hasNext()) {
 			Entry qNeighbor = it.next();
 
-			
+			cacheCopy.add(qNeighbor);
 			
 			Node sentTo = qNeighbor.getSentTo();
 			if (sentTo != null && source.getID() == sentTo.getID()) {
 				replacableIndices.add(it.nextIndex() - 1);
 			}
-			
-			cacheCopy.add(new Entry(qNeighbor.getNode()));
 		}
 
 		for (Entry neighbor : neighbors) {
 			boolean alreadyInCache = cacheCopy.remove(neighbor);
 
 			if (!alreadyInCache) {
-				Entry entry = new Entry(neighbor.getNode());
-				
 				if (cache.size() < size) {
-					cache.add(entry);
+					cache.add(neighbor);
 				} else if (!replacableIndices.isEmpty()) {
-					cache.set(replacableIndices.poll(), entry);
+					cache.set(replacableIndices.poll(), neighbor);
 				}
 			}
-		}
-		
-		for (Entry cachedEntry : cache) {
-			cachedEntry.setSentTo(null);
 		}
 	}
 	
