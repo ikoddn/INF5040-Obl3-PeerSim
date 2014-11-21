@@ -60,8 +60,6 @@ public class InDegreeObserver implements Control {
 					else
 						degreeCount.put(nodeId, count + 1);
 				}
-			} else {
-				throw new RuntimeException();
 			}
 		}
 
@@ -73,10 +71,6 @@ public class InDegreeObserver implements Control {
 		for (int i = 0; i < Network.size(); i++) {
 			Long nodeId = Network.get(i).getID();
 			Integer degree = degreeCount.get(nodeId);
-			
-			if (degree == null) {
-				throw new RuntimeException();
-			}
 			int value = 1;
 			if (dist.containsKey(degree))
 				value = dist.get(degree) + 1;
