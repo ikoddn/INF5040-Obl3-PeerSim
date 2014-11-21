@@ -16,7 +16,6 @@ simulation.logtime CYCLE
 
 # the cache size should be set to 30 and to 50.
 CACHESIZE 30
-TYPE Shuffle
 
 
 protocol.tr UniformRandomTransport
@@ -59,7 +58,7 @@ control.avgClustering no.uio.inf5040.obl3.AverageClusteringPrinter
 	step CYCLE
 	undir true
 	nc 1000
-	type TYPE
+	type Shuffle
 	cacheSize CACHESIZE
 }
 
@@ -69,7 +68,7 @@ control.avgLength no.uio.inf5040.obl3.AverageLengthPrinter
 	step CYCLE
 	undir true
 	nl 10
-	type TYPE
+	type Shuffle
 	cacheSize CACHESIZE
 }
 
@@ -77,6 +76,6 @@ control.degree no.uio.inf5040.obl3.InDegreePrinter
 {
 	protocol gossip
 	step CYCLE
-	type TYPE
+	type Shuffle
 	cacheSize CACHESIZE
 }
