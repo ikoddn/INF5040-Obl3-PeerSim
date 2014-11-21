@@ -1,3 +1,1 @@
-/INF5040-Obl3/plot/output-clustering.txt
-/INF5040-Obl3/plot/output-indegree.txt
-/INF5040-Obl3/plot/output-length.txt
+/INF5040-Obl3/plot/*.txt

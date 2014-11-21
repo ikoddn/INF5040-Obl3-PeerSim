@@ -30,6 +30,8 @@ public class InDegreePrinter extends GraphStatsPrinter {
 		super(name);
 
 		pid = Configuration.getPid(name + "." + PAR_PID);
+		
+		init("output-indegree-" + type + "-c" + cacheSize + ".txt");
 	}
 
 	@Override

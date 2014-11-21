@@ -5,13 +5,16 @@
 SIZE 10000
 
 CYCLE 1000
-CYCLES 10
+CYCLES 300
 
 random.seed 1234567890
 network.size SIZE
 simulation.endtime CYCLE*CYCLES
 simulation.logtime CYCLE
 
+# the cache size should be set to 30 and to 50.
+CACHESIZE 30
+TYPE Random
 
 protocol.gossip IdleProtocol
 {
@@ -20,16 +23,7 @@ protocol.gossip IdleProtocol
 init.wire WireKOut
 {
 	protocol gossip
-	k 50
-}
-
-control.degree example.reports.InDegreeObserver
-{
-	protocol gossip
-
-	step CYCLE
-	starttime 9000
-	endtime 10000
+	k CACHESIZE
 }
 
 control.avgClustering no.uio.inf5040.obl3.AverageClusteringPrinter
@@ -37,8 +31,9 @@ control.avgClustering no.uio.inf5040.obl3.AverageClusteringPrinter
 	protocol gossip
 	step CYCLE
 	undir true
-	outf output-clustering.txt
 	nc 1000
+	type TYPE
+	cacheSize CACHESIZE
 }
 
 control.avgLength no.uio.inf5040.obl3.AverageLengthPrinter
@@ -46,6 +41,15 @@ control.avgLength no.uio.inf5040.obl3.AverageLengthPrinter
 	protocol gossip
 	step CYCLE
 	undir true
-	outf output-length.txt
 	nl 10
+	type TYPE
+	cacheSize CACHESIZE
+}
+
+control.degree no.uio.inf5040.obl3.InDegreePrinter
+{
+	protocol gossip
+	step CYCLE
+	type TYPE
+	cacheSize CACHESIZE
 }

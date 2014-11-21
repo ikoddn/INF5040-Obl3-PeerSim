@@ -12,20 +12,27 @@ public abstract class GraphStatsPrinter extends GraphObserver {
 
 	private static final String OUTPUT_LOCATION = "plot/";
 	
-	private static final String PAR_OUTFILE = "outf";
+	private static final String PAR_CACHESIZE = "cacheSize";
 	private static final String PAR_STEP = "step";
+	private static final String PAR_TYPE = "type";
 
+	protected final int cacheSize;
 	protected final int step;
+	protected final String type;
 	private PrintWriter writer;
 
-	protected GraphStatsPrinter(String name) throws FileNotFoundException {
+	protected GraphStatsPrinter(String name) {
 		super(name);
 
+		String prefix = name + ".";
+		cacheSize = Configuration.getInt(prefix + PAR_CACHESIZE);
+		type = Configuration.getString(prefix + PAR_TYPE);
 		step = Configuration.getInt(name + "." + PAR_STEP, 0);
-
-		String outfile = Configuration.getString(name + "." + PAR_OUTFILE);
+	}
+	
+	protected void init(String filename) throws FileNotFoundException {
 		try {
-			writer = new PrintWriter(OUTPUT_LOCATION + outfile, "UTF-8");
+			writer = new PrintWriter(OUTPUT_LOCATION + filename, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			// Not possible
 		}

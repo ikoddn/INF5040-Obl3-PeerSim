@@ -49,6 +49,8 @@ public class AverageClusteringPrinter extends GraphStatsPrinter {
 		super(name);
 
 		nc = Configuration.getInt(name + "." + PAR_NC, 0);
+		
+		init("output-clustering-" + type + "-c" + cacheSize + ".txt");
 	}
 
 	/**
