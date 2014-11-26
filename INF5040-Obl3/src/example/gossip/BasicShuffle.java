@@ -142,11 +142,13 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 	}
 	
 	/**
-	 * @param srcNode
-	 * @param destNode
-	 * @param subset
-	 * @param type
-	 * @param protocolID
+	 * Sends a message (subset) to another node
+	 * 
+	 * @param srcNode source of the message
+	 * @param destNode destination of the message
+	 * @param subset subset to send
+	 * @param type type of message
+	 * @param protocolID id of the protocol to use
 	 */
 	private void sendMessage(Node srcNode, Node destNode, List<Entry> subset, MessageType type, int protocolID) {
 		GossipMessage message = new GossipMessage(srcNode, subset);
